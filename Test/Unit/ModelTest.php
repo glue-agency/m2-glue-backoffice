@@ -6,34 +6,27 @@ namespace GlueAgency\Backoffice\Test\Unit;
 
 use GlueAgency\Backoffice\Model\Client;
 use GlueAgency\Backoffice\Model\InstallUid;
-use GlueAgency\Backoffice\Model\Language;
-use GlueAgency\Backoffice\Model\Plugins;
+use GlueAgency\Backoffice\Model\Packages;
+use GlueAgency\Backoffice\Model\Report;
 use PHPUnit\Framework\TestCase;
 
 class ModelTest extends TestCase
 {
-    public function testLanguageFromLocale(): void
+    public function testPlatformRequirementsAreNotPackages(): void
     {
-        $this->assertSame('nl-BE', Language::fromLocale('nl_BE'));
-        $this->assertSame('en-US', Language::fromLocale(null));
+        $this->assertTrue(Packages::isPlatformRequirement('php'));
+        $this->assertTrue(Packages::isPlatformRequirement('ext-intl'));
+        $this->assertTrue(Packages::isPlatformRequirement('lib-curl'));
+        $this->assertTrue(Packages::isPlatformRequirement('composer-plugin-api'));
+        $this->assertFalse(Packages::isPlatformRequirement('magento/product-community-edition'));
+        $this->assertFalse(Packages::isPlatformRequirement('mollie/magento2'));
     }
 
-    public function testCorePackageFilter(): void
+    public function testEditionReadsAsAdobeNamesIt(): void
     {
-        $this->assertTrue(Plugins::isCorePackage('magento/module-catalog'));
-        $this->assertFalse(Plugins::isCorePackage('mollie/magento2'));
-        $this->assertFalse(Plugins::isCorePackage('glue-agency/m2-glue-auth'));
-    }
-
-    public function testIsUnder(): void
-    {
-        $this->assertTrue(Plugins::isUnder('/var/www/app/code/Acme/Foo', '/var/www/app/code'));
-        $this->assertFalse(Plugins::isUnder('/var/www/app/codex/Foo', '/var/www/app/code'));
-    }
-
-    public function testVendorOf(): void
-    {
-        $this->assertSame('Mollie', Plugins::vendorOf('Mollie_Payment'));
+        $this->assertSame('Open Source', Report::edition('Community'));
+        $this->assertSame('Adobe Commerce', Report::edition('Enterprise'));
+        $this->assertSame('Adobe Commerce B2B', Report::edition('B2B'));
     }
 
     public function testUidIsV4(): void

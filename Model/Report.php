@@ -35,29 +35,29 @@ class Report
     private $installUid;
 
     /**
-     * @var Plugins
+     * @var Packages
      */
-    private $plugins;
+    private $packages;
 
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param StoreManagerInterface $storeManager
      * @param ProductMetadataInterface $productMetadata
      * @param InstallUid $installUid
-     * @param Plugins $plugins
+     * @param Packages $packages
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         StoreManagerInterface $storeManager,
         ProductMetadataInterface $productMetadata,
         InstallUid $installUid,
-        Plugins $plugins
+        Packages $packages
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->productMetadata = $productMetadata;
         $this->installUid = $installUid;
-        $this->plugins = $plugins;
+        $this->packages = $packages;
     }
 
     /**
@@ -70,10 +70,11 @@ class Report
             'platform'   => 'magento',
             'title'      => $this->limit($this->title()),
             'version'    => $this->limit((string) $this->productMetadata->getVersion()),
+            'edition'    => self::edition((string) $this->productMetadata->getEdition()),
             'phpVersion' => PHP_VERSION,
             'uid'        => $this->installUid->get(),
-            'sites'      => $this->sites(),
-            'plugins'    => array_map([$this, 'limitPlugin'], $this->plugins->collect()),
+            'storeViews' => $this->storeViews(),
+            'packages'   => array_map([$this, 'limitAll'], $this->packages->collect()),
         ];
 
         if ($repositoryName !== null && $repositoryName !== '') {
@@ -104,48 +105,64 @@ class Report
     }
 
     /**
+     * Magento's edition as Adobe names it: Open Source, or Adobe Commerce.
+     *
+     * @param string $edition
+     * @return string
+     */
+    public static function edition(string $edition): string
+    {
+        switch ($edition) {
+            case 'Community':
+                return 'Open Source';
+            case 'Enterprise':
+                return 'Adobe Commerce';
+            case 'B2B':
+                return 'Adobe Commerce B2B';
+            default:
+                return $edition;
+        }
+    }
+
+    /**
+     * Every store view but admin, with the website it belongs to.
+     *
      * @return array
      */
-    private function sites(): array
+    private function storeViews(): array
     {
-        $multipleWebsites = count($this->storeManager->getWebsites()) > 1;
-        $sites = [];
+        $storeViews = [];
 
         foreach ($this->storeManager->getStores() as $store) {
             if ((int) $store->getId() === 0) {
                 continue;
             }
 
-            $title = (string) $store->getName();
-
-            if ($multipleWebsites) {
-                $title = $store->getWebsite()->getName() . ' - ' . $title;
-            }
-
             $code = (string) $store->getCode();
 
-            $sites[] = [
-                'uid'      => $this->limit($code),
-                'handle'   => $this->limit($code),
-                'title'    => $this->limit($title),
-                'language' => Language::fromLocale(
+            $storeViews[] = [
+                'uid'     => $this->limit($code),
+                'code'    => $this->limit($code),
+                'name'    => $this->limit((string) $store->getName()),
+                'website' => $this->limit((string) $store->getWebsite()->getName()),
+                'locale'  => $this->limit(
                     (string) $this->scopeConfig->getValue('general/locale/code', ScopeInterface::SCOPE_STORE, $code)
                 ),
-                'url'      => $this->limit((string) $store->getBaseUrl(UrlInterface::URL_TYPE_LINK, true)),
-                'enabled'  => $store->isActive() ? 1 : 0,
+                'url'     => $this->limit((string) $store->getBaseUrl(UrlInterface::URL_TYPE_LINK, true)),
+                'enabled' => $store->isActive() ? 1 : 0,
             ];
         }
 
-        return $sites;
+        return $storeViews;
     }
 
     /**
-     * @param array $plugin
+     * @param array $row
      * @return array
      */
-    private function limitPlugin(array $plugin): array
+    private function limitAll(array $row): array
     {
-        return array_map([$this, 'limit'], $plugin);
+        return array_map([$this, 'limit'], $row);
     }
 
     /**

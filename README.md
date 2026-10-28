@@ -1,6 +1,6 @@
 # Glue Backoffice for Magento 2
 
-Reports a Magento 2 install to the Glue Dashboard after each deploy: Magento and PHP version, store views and the third-party modules it runs. The Magento counterpart of `glue-agency/craft-glue-backoffice`.
+Reports a Magento 2 shop to the Glue Dashboard after each deploy: its Magento version and edition, PHP version, store views and the Composer packages it requires. The Magento counterpart of `glue-agency/craft-glue-backoffice`.
 
 ## Installation
 
@@ -44,21 +44,23 @@ When the Dashboard refuses the report it prints every message it sent back, whic
 
 What is reported:
 
-- the store name, Magento version (patch suffix included) and PHP version;
-- one entry per store view (admin excluded): code, name, language, secure base URL and whether it is active;
-- every enabled module that lives in `app/code` or comes from a Composer package that is not `magento/*`, with the package version;
+- the store name, Magento version (patch suffix included), edition (Open Source or Adobe Commerce) and PHP version;
+- one entry per store view (admin excluded): code, name, website, locale, secure base URL and whether it is active;
+- the Composer packages the shop requires directly — its root `composer.json`'s `require`, not its whole lock file — with the installed version and description; Magento itself is among them as `magento/product-community-edition`, and platform requirements (`php`, `ext-*`) are left out;
 - the repository, when given.
 
 The report carries a uid, a UUID generated on the first run and kept in `core_config_data` as `glue_backoffice/general/uid`. The Dashboard knows the shop by its token, not by this uid: a shop rebuilt on a fresh database reports a new uid, and its own token accepts it.
 
 ### Onboarding a shop
 
-The Dashboard has to know the Magento platform first (the release that adds it, Oct 2026). A Dashboard from before it ignores the `platform` key and files the shop as a Craft install.
+The Dashboard has to know the Magento platform first (the release that adds platforms, Oct 2026). A Dashboard from before it ignores the `platform` key and files the shop as a Craft install.
 
-1. On the Dashboard, add the install by hand: platform **Magento**, its domain and its current version. It may share its domain with the brand's Craft site; they are two installs.
-2. On its page, switch it to **automatic** and issue it a reporting token.
-3. On the production host only: `php bin/magento config:set --lock-env glue_backoffice/general/token <token>`.
-4. Deploy. The shop's first report fills in its version, store views and modules.
+On the Dashboard a brand's Craft site and the Magento shop beside it are **one install**, and both report with that install's one token: the shop's first report adds its Magento section, store views and packages beside what Craft reports.
+
+1. Use the install the brand already has. If it has none yet, add it by hand (platform **Magento**, its domain and current version), switch it to **automatic** and issue it a reporting token.
+2. Its token can't be read back once issued: if the Craft site already reports with it, issue a new one and give it to **both** — Craft's `.env` and the shop.
+3. On the shop's production host only: `php bin/magento config:set --lock-env glue_backoffice/general/token <token>`.
+4. Deploy. The shop's first report fills in its version, store views and packages.
 
 ### Deployer
 

@@ -125,18 +125,18 @@ class ReportCommand extends Command
             return Cli::RETURN_FAILURE;
         }
 
-        $output->writeln("<info>Reported Magento '{$payload['title']}' v'{$payload['version']}'</info>");
+        $output->writeln("<info>Reported Magento {$payload['edition']} '{$payload['title']}' v'{$payload['version']}'</info>");
         $output->writeln("    PHP v'{$payload['phpVersion']}'");
         $output->writeln('<info>Store views</info>');
 
-        foreach ($payload['sites'] as $site) {
-            $output->writeln("    Store view '{$site['title']}' ({$site['language']})");
+        foreach ($payload['storeViews'] as $storeView) {
+            $output->writeln("    Store view '{$storeView['name']}' ({$storeView['code']}, {$storeView['locale']})");
         }
 
-        $output->writeln('<info>Modules</info>');
+        $output->writeln('<info>Packages</info>');
 
-        foreach ($payload['plugins'] as $plugin) {
-            $output->writeln("    Module '{$plugin['title']}' v'{$plugin['version']}'");
+        foreach ($payload['packages'] as $package) {
+            $output->writeln("    Package '{$package['name']}' v'{$package['version']}'");
         }
 
         $output->writeln('<info>Repository</info>');
