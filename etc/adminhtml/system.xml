@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="glue" translate="label" sortOrder="900">
+            <label>Glue</label>
+        </tab>
+        <section id="glue_backoffice" translate="label" type="text" sortOrder="10" showInDefault="1"
+                 showInWebsite="0" showInStore="0">
+            <class>separator-top</class>
+            <label>Backoffice</label>
+            <tab>glue</tab>
+            <resource>GlueAgency_Backoffice::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Glue Dashboard</label>
+                <field id="url" translate="label" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>URL</label>
+                </field>
+                <field id="token" translate="label comment" type="obscure" sortOrder="20" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Token</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment>Only set on the production host. Without a token nothing is reported.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

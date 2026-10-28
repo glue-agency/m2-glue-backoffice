@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="glue_backoffice_report" xsi:type="object">GlueAgency\Backoffice\Console\Command\ReportCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="GlueAgency\Backoffice\Console\Command\ReportCommand">
+        <arguments>
+            <argument name="config" xsi:type="object">GlueAgency\Backoffice\Model\Config\Proxy</argument>
+            <argument name="report" xsi:type="object">GlueAgency\Backoffice\Model\Report\Proxy</argument>
+            <argument name="client" xsi:type="object">GlueAgency\Backoffice\Model\Client\Proxy</argument>
+            <argument name="state" xsi:type="object">Magento\Framework\App\State\Proxy</argument>
+        </arguments>
+    </type>
+</config>

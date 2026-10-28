@@ -1,0 +1,25 @@
+{
+    "name": "glue-agency/m2-glue-backoffice",
+    "description": "Reports a Magento 2 install to the Glue Dashboard after each deploy",
+    "require": {
+        "php": ">=7.4",
+        "magento/framework": "*",
+        "magento/module-config": "*",
+        "magento/module-store": "*"
+    },
+    "keywords": [
+        "magento",
+        "glue",
+        "backoffice"
+    ],
+    "type": "magento2-module",
+    "license": "MIT",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "GlueAgency\\Backoffice\\": ""
+        }
+    }
+}
