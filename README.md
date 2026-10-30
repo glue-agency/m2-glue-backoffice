@@ -45,7 +45,7 @@ When the Dashboard refuses the report it prints every message it sent back, whic
 What is reported:
 
 - the store name, Magento version (patch suffix included), edition (Open Source or Adobe Commerce) and PHP version;
-- one entry per store view (admin excluded): code, name, website, locale, secure base URL and whether it is active;
+- one entry per store view (admin excluded): its id (Magento's `store_id`, which the Dashboard knows it by), code, name, website, locale, secure base URL and whether it is active;
 - the Composer packages the shop requires directly — its root `composer.json`'s `require`, not its whole lock file — with the installed version and description; Magento itself is among them as `magento/product-community-edition`, and platform requirements (`php`, `ext-*`) are left out;
 - the repository, when given.
 

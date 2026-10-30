@@ -125,7 +125,9 @@ class Report
     }
 
     /**
-     * Every store view but admin, with the website it belongs to.
+     * Every store view but admin, with the website it belongs to. The Dashboard
+     * knows a store view by its id, Magento's store_id: an admin can rename the
+     * code, but the id never changes.
      *
      * @return array
      */
@@ -141,7 +143,7 @@ class Report
             $code = (string) $store->getCode();
 
             $storeViews[] = [
-                'uid'     => $this->limit($code),
+                'id'      => (int) $store->getId(),
                 'code'    => $this->limit($code),
                 'name'    => $this->limit((string) $store->getName()),
                 'website' => $this->limit((string) $store->getWebsite()->getName()),
