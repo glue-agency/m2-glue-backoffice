@@ -10,9 +10,19 @@ use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * What the shop says about itself. From live, the report the Dashboard keeps
+ * as its install's Magento section. From any other environment only where each
+ * store view answers there, which is all the Dashboard keeps of one.
+ */
 class Report
 {
     private const MAX_LENGTH = 255;
+
+    /**
+     * The names the Dashboard reads as live.
+     */
+    private const LIVE = ['production', 'prod', 'live'];
 
     /**
      * @var ScopeConfigInterface
@@ -39,6 +49,7 @@ class Report
      */
     private $packages;
 
+
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param StoreManagerInterface $storeManager
@@ -61,21 +72,62 @@ class Report
     }
 
     /**
+     * Magento runs production mode on staging too, so the shop cannot tell
+     * staging from live: the deploy names it, as it names the repository.
+     * Empty when the deploy did not: never read as live, which a staging or
+     * dev host left unnamed would then overwrite.
+     *
+     * @param string|null $environment as `--environment` gave it, null when left out
+     * @return string
+     */
+    public static function environment(?string $environment): string
+    {
+        return trim((string) $environment);
+    }
+
+    /**
+     * @param string $environment
+     * @return bool
+     */
+    public static function isLive(string $environment): bool
+    {
+        return in_array(strtolower($environment), self::LIVE, true);
+    }
+
+    /**
+     * Any other environment sends no version or uid, so a Dashboard too old to
+     * know environments refuses it rather than file it as live.
+     *
      * @param string|null $repositoryName
+     * @param string $environment
      * @return array
      */
-    public function build(?string $repositoryName = null): array
+    public function build(?string $repositoryName, string $environment): array
     {
-        $payload = [
-            'platform'   => 'magento',
-            'title'      => $this->limit($this->title()),
-            'version'    => $this->limit((string) $this->productMetadata->getVersion()),
-            'edition'    => self::edition((string) $this->productMetadata->getEdition()),
-            'phpVersion' => PHP_VERSION,
-            'uid'        => $this->installUid->get(),
-            'storeViews' => $this->storeViews(),
-            'packages'   => array_map([$this, 'limitAll'], $this->packages->collect()),
-        ];
+        if (self::isLive($environment)) {
+            $payload = [
+                'platform'    => 'magento',
+                'environment' => $this->limit($environment),
+                'title'       => $this->limit($this->title()),
+                'version'     => $this->limit((string) $this->productMetadata->getVersion()),
+                'edition'     => self::edition((string) $this->productMetadata->getEdition()),
+                'phpVersion'  => PHP_VERSION,
+                'uid'         => $this->installUid->get(),
+                'storeViews'  => $this->storeViews(),
+                'packages'    => array_map([$this, 'limitAll'], $this->packages->collect()),
+            ];
+        } else {
+            $payload = [
+                'platform'    => 'magento',
+                'environment' => $this->limit($environment),
+                'title'       => $this->limit($this->title()),
+                'storeViews'  => array_map(function (array $storeView) {
+                    unset($storeView['enabled']);
+
+                    return $storeView;
+                }, $this->storeViews()),
+            ];
+        }
 
         if ($repositoryName !== null && $repositoryName !== '') {
             $payload['repository'] = ['name' => $this->limit($repositoryName)];

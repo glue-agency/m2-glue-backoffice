@@ -22,7 +22,7 @@
                        showInWebsite="0" showInStore="0">
                     <label>Token</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <comment>Only set on the production host. Without a token nothing is reported.</comment>
+                    <comment>Set on every host the shop is deployed to; the deploy names its environment. Without a token nothing is reported.</comment>
                 </field>
             </group>
         </section>

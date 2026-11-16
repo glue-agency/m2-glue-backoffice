@@ -29,6 +29,22 @@ class ModelTest extends TestCase
         $this->assertSame('Adobe Commerce B2B', Report::edition('B2B'));
     }
 
+    public function testProductionProdAndLiveAreLive(): void
+    {
+        $this->assertTrue(Report::isLive('production'));
+        $this->assertTrue(Report::isLive('Prod'));
+        $this->assertTrue(Report::isLive('LIVE'));
+        $this->assertFalse(Report::isLive('staging'));
+        $this->assertFalse(Report::isLive('dev'));
+    }
+
+    public function testTheDeployNamesTheEnvironmentAndLeftOutIsNone(): void
+    {
+        $this->assertSame('', Report::environment(null));
+        $this->assertSame('', Report::environment('  '));
+        $this->assertSame('staging', Report::environment(' staging '));
+    }
+
     public function testUidIsV4(): void
     {
         $this->assertMatchesRegularExpression(
